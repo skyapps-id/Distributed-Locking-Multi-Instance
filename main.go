@@ -3,15 +3,20 @@ package main
 import (
 	"context"
 	"dle/redis"
+	"errors"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
 	"strconv"
-	"sync"
+	"time"
 )
 
 var ctx = context.Background()
 var rds = redis.NewRedisClient()
 
-func decriment() {
+func decriment() error {
 	rs := rds.Redsync()
 	mutex := rs.NewMutex("promo-lock")
 
@@ -19,38 +24,54 @@ func decriment() {
 	val, err := rds.Get(ctx, "PROMO")
 	if err != nil {
 		fmt.Println("not found value")
+		return errors.New("not found value")
 	}
 
 	toInt, _ := strconv.Atoi(val.(string))
+	if toInt <= 0 {
+		fmt.Println("promo is over")
+		return errors.New("promo is over")
+	}
 	toInt--
 	if err := rds.Set(ctx, "PROMO", toInt, 0); err != nil {
 		fmt.Println(err)
 	}
 	mutex.Unlock()
+	return nil
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
 	// Init Promo
 	if err := rds.Set(ctx, "PROMO", 30000, 0); err != nil {
 		fmt.Println(err)
 	}
 
-	// Run multi threading
-	var wg sync.WaitGroup
-	doIncrement := func(n int) {
-		for i := 0; i < n; i++ {
-			decriment()
+	getPromo := func(w http.ResponseWriter, req *http.Request) {
+		val, err := rds.Get(ctx, "PROMO")
+		if err != nil {
+			fmt.Println("not found value")
 		}
-		wg.Done()
+		io.WriteString(w, fmt.Sprintf("Promo Quota : %s", val))
 	}
 
-	wg.Add(3)
-	go doIncrement(10000)
-	go doIncrement(10000)
-	go doIncrement(10000)
-	wg.Wait()
+	submitPromo := func(w http.ResponseWriter, req *http.Request) {
+		log.Println(time.Now().Format("15:04:05"))
+		err := decriment()
+		if err != nil {
+			io.WriteString(w, err.Error())
+		} else {
+			io.WriteString(w, "ok!")
+		}
+	}
 
-	val, _ := rds.Get(ctx, "PROMO")
-	fmt.Println(val)
-	// Result 0
+	http.HandleFunc("/get-promo", getPromo)
+	http.HandleFunc("/submit-promo", submitPromo)
+
+	log.Println("Listing for Rest API " + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
