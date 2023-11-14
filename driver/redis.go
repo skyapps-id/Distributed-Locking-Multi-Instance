@@ -2,6 +2,8 @@ package driver
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -24,9 +26,9 @@ type (
 
 func NewRedisClient() redisInstance {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
+		Password: os.Getenv("REDIS_PASSWORD"), // no password set
+		DB:       0,                           // use default DB
 	})
 
 	return redisInstance{client: rdb}

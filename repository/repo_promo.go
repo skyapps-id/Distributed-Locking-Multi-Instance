@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Promo interface {
@@ -44,7 +45,7 @@ func (r *promo) DecrimentPromoByCode(ctx context.Context, code string) (err erro
 	tx := r.db.Begin()
 
 	var result entity.Promo
-	err = tx.WithContext(ctx).Table("promos").Where("promos.code = ?", code).Take(&result).Error
+	err = tx.WithContext(ctx).Table("promos").Clauses(clause.Locking{Strength: "UPDATE"}).Where("promos.code = ?", code).Take(&result).Error
 	if err != nil {
 		tx.Rollback()
 		return

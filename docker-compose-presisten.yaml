@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  dl-postgres:
+    image: postgres
+    container_name: dl-database
+    hostname: dl-database
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: dl-database
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    networks:
+      - dev-network-dl
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data
+
+  dl-redis:
+    image: redis
+    container_name: dl-redis
+    hostname: dl-redis
+    ports:
+      - '6379:6379'
+    # command: redis-server --save 20 1 --loglevel warning --requirepass password
+    networks:
+      - dev-network-dl
+    volumes: 
+      - ./data/redis_data:/data
+
+networks:
+  dev-network-dl:
+    driver: bridge

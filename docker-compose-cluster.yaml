@@ -1,0 +1,63 @@
+version: '3.0'
+
+services:
+  app1:
+    image: distributed-locking-multi-instance-app:latest
+    container_name: app1
+    hostname: app1.local
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=dl-database
+      - DB_PORT=5432
+      - DB_NAME=dl-database
+      - REDIS_HOST=dl-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+    ports: 
+      - "3000"
+    networks:
+      - dev-network-dl
+
+  app2:
+    image: distributed-locking-multi-instance-app:latest
+    container_name: app2
+    hostname: app2.local
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=dl-database
+      - DB_PORT=5432
+      - DB_NAME=dl-database
+      - REDIS_HOST=dl-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+    ports: 
+     - "3000"
+    networks:
+      - dev-network-dl
+
+  app3:
+    image: distributed-locking-multi-instance-app:latest
+    container_name: app3
+    hostname: app3.local
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=dl-database
+      - DB_PORT=5432
+      - DB_NAME=dl-database
+      - REDIS_HOST=dl-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+    ports: 
+     - "3000"
+    networks:
+      - dev-network-dl
+
+networks:
+  dev-network-dl:
+    driver: bridge

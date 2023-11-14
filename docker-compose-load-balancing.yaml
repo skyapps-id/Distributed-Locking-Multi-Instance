@@ -1,0 +1,16 @@
+version : “3.9”
+services :
+  dl-nginx:
+    image: nginx:latest
+    container_name: dl-nginx
+    hostname: nginx
+    ports:
+      - 3000:3000
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - dev-network-dl
+
+networks:
+  dev-network-dl:
+    driver: bridge

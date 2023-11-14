@@ -2,19 +2,19 @@ package driver
 
 import (
 	"fmt"
+	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func NewGormDatabase() (db *gorm.DB) {
-	dsn := fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=%s",
-		"postgres",
-		"root",
-		"root",
-		"localhost",
-		5432,
-		"rust-database",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
 		"disable",
 	)
 
